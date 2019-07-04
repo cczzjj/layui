@@ -705,6 +705,7 @@ layui.define(['laytpl', 'laypage', 'layer', 'form', 'util'], function(exports){
         ,data: data
         ,dataType: 'json'
         ,headers: options.headers || {}
+        ,tryCount: 0
         ,success: function(res){
           //如果有数据解析的回调，则获得其返回的数据
           if(typeof options.parseData === 'function'){
@@ -725,6 +726,11 @@ layui.define(['laytpl', 'laypage', 'layer', 'form', 'util'], function(exports){
           typeof options.done === 'function' && options.done(res, curr, res[response.countName]);
         }
         ,error: function(e, m){
+          this.tryCount++;
+          if (this.tryCount <= this.retryLimit) {
+            //try again
+            return $.ajax(this);
+          }
           that.errorView('数据接口请求异常：'+ m);
 
           that.renderForm();
